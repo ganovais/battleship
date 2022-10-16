@@ -1,0 +1,74 @@
+<div ng-controller="HomeController" ng-cloak class="home-container">
+   <div ng-if="startedGame" class="ships-placed">
+      <p>Navios prontos para guerra!</p>
+      <div>
+         <div ng-repeat="ship in getShips()" class="ship" ng-if="ship.indexStart != 0">
+            <div ng-class="ship.class" class="legend"></div>
+            <div>
+               <p>{{ship.label}}</p>
+               <small>tamanho: {{ship.size}}</small>
+            </div>
+         </div>
+      </div>
+   </div>
+   
+   <div class="ships">
+      <p>Arrume suas embarcações no campo de batalha</p>
+      <div class="ships-choose">
+         <div draggable="false" ng-repeat="ship in getShips()" ng-class="ship.class" class="ship">
+            <div draggable="true" class="draggable" ondragstart="angular.element(this).scope().drag(event)" id={{ship.id}}>
+               <img src={{moveSVG}} alt="">
+            </div>
+            <div>
+               <p>{{ship.label}}</p>
+               <small>tamanho: {{ship.size}}</small>
+            </div>
+         </div>
+
+         <p ng-if="!getShips().length">Todas embarcações alocadas para guerra</p>
+      </div>
+      <div class="ship-direction">
+         <p>Posição</p>
+
+         <div class="choices">
+            <div class="choice">
+               <input ng-model="direction" value="horizontal" type="radio" id="horizontal">
+               <label for="horizontal">Horizontal</label>
+            </div>
+
+            <div class="choice">
+               <input ng-model="direction" value="vertical" type="radio" id="vertical">
+               <label for="vertical">Vertical</label>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <div class="board">
+      <div>
+         Campo de batalha
+         <div class="combat-field">
+            <div ng-repeat="index in boardPositions" data-index="{{index}}" class="position" ondrop="angular.element(this).scope().drop(event)"
+               ondragover="angular.element(this).scope().allowDrop(event)">
+               <p ng-if="index > 0 && index < 11">{{index}}</p>
+               <p ng-if="index != 0 && index % 11 == 0">{{numberToLetter(index)}}</p>
+            </div>
+         </div>
+      </div>
+
+      <div ng-if="startedGame">
+         Posições que você já jogou no seu oponente
+         <div class="combat-field">
+            <div ng-repeat="index in boardPositions" data-index="{{index}}" class="position" >
+               <p ng-if="index > 0 && index < 11">{{index}}</p>
+               <p ng-if="index != 0 && index % 11 == 0">{{numberToLetter(index)}}</p>
+            </div>
+         </div>
+      </div>
+   </div>
+   <button type="submit"
+   class="mt-10 inline-flex items-center rounded-md border border-transparent bg-indigo-100 px-4 py-2 text-base font-medium text-indigo-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+   ng-click="startGame()">
+   Iniciar jogo</button>
+
+</div>

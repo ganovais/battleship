@@ -1,10 +1,12 @@
 import path from "path";
+import sass from "sass";
 
 export default {
    mode: "development",
    entry: [
       "./src/index.js",
       "./src/pages/login/login.controller.js",
+      "./src/pages/home/home.controller.js",
       "./src/pages/components/header/header.controller.js",
       "./src/pages/components/header/header.module.js",
    ],
@@ -16,8 +18,8 @@ export default {
       static: {
          directory: path.resolve("public"),
       },
-      port: 3000,
-      // open: true,
+      port: 3001,
+      open: true,
       hot: true,
       compress: true,
       historyApiFallback: true,
@@ -25,10 +27,19 @@ export default {
    module: {
       rules: [
          {
-            test: /\.css$/i,
-            include: path.resolve('src'),
-            use: ['style-loader', 'css-loader'],
-          },
+            test: /\.s[ac]ss$/i,
+            include: path.resolve("src"),
+            use: [
+               "style-loader",
+               "css-loader",
+               {
+                  loader: "sass-loader",
+                  options: {
+                     implementation: sass,
+                  },
+               },
+            ],
+         },
          {
             test: /\.m?js/,
             type: "javascript/auto",
@@ -56,6 +67,17 @@ export default {
             options: {
                esModule: false,
             },
+         },
+         {
+            test: /\.(png|jpe?g|gif|svg)$/i,
+            use: [
+               {
+                  loader: "url-loader",
+                  options: {
+                     limit: 8192,
+                  },
+               },
+            ],
          },
       ],
    },

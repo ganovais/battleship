@@ -1,4 +1,5 @@
 import angular from "angular";
+import { io } from "socket.io-client";
 import moveSVG from "../../assets/move.svg";
 import api from "../../services/api";
 
@@ -7,10 +8,11 @@ angular.module("app").controller("HomeController", [
    function ($scope) {
       const sizeBoard = 121; //11*11
       const marginRight = [11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121];
+      const socket = io("http://localhost:3000");
       $scope.moveSVG = moveSVG;
       $scope.startedGame = false;
       $scope.direction = "horizontal";
-      const ships = [
+      let ships = [
          {
             id: 1,
             class: "aircraft-carrier",
@@ -57,9 +59,55 @@ angular.module("app").controller("HomeController", [
             direction: "horizontal",
          },
       ];
-      const shipsPlaced = [];
+      let shipsPlaced = [];
       $scope.columnName = [{ index: 11, name: "a" }];
       $scope.boardPositions = [...Array(sizeBoard).keys()];
+      const userLogged = JSON.parse(localStorage.getItem("battleship@user"));
+      async function checkExistingPositions() {
+         const { data } = await api.get("positions");
+         const {
+            data: { attacks },
+         } = await api.get("positions/attacks");
+
+         data.positions.map((item) => addShip(item, item.indexStart));
+         ships = [];
+         $scope.startedGame = true;
+         shipsPlaced = data.positions;
+         if (attacks.length) {
+            attacks.forEach((item) =>
+               setAttack(item.index, item.successHit, item.userId)
+            );
+         }
+         $scope.$apply();
+      }
+
+      function startSocket() {
+         socket.on("connect", () => {
+            console.log(`Socket ${socket.id}`);
+         });
+
+         socket.on("receiveAttack", (data) => {
+            setAttack(data.index, data.successHit, data.userId);
+         });
+
+         socket.on("shipSankReceive", (data) => {
+            if (data.userLogged.id != userLogged.id) {
+               const currentText = document.querySelector(
+                  `.ship-information.${data.ship}`
+               ).innerHTML;
+               const info = currentText.split(":");
+               document.querySelector(
+                  `.ship-information.${data.ship}`
+               ).innerHTML = `Detonado tamanho: ${info[1]}`;
+            }
+         });
+
+         return () => {
+            socket.off("connect");
+            socket.off("receiveAttack");
+            socket.off("shipSank");
+         };
+      }
 
       $scope.numberToLetter = (number) => {
          return String.fromCharCode(number / 11 + 64);
@@ -78,6 +126,7 @@ angular.module("app").controller("HomeController", [
       };
 
       $scope.getShips = () => ships;
+      $scope.getShipsPlaced = () => shipsPlaced;
 
       function validateIfAddShip(elementMoving, index) {
          let blockAddShip = false;
@@ -122,7 +171,7 @@ angular.module("app").controller("HomeController", [
             );
          }
          for (let i = 0; i < elementMoving.size; i++) {
-            if ($scope.direction == "horizontal") {
+            if (elementMoving.direction == "horizontal") {
                indexHelper = index + i;
                const position = document.querySelector(
                   `[data-index="${indexHelper}"]`
@@ -136,9 +185,12 @@ angular.module("app").controller("HomeController", [
                indexHelper = indexHelper + 11;
             }
          }
+         if (elementMoving.direction == "vertical") {
+            indexHelper = indexHelper - 11;
+         }
+
          elementMoving.indexStart = index;
          elementMoving.indexEnd = indexHelper;
-         elementMoving.direction = $scope.direction;
       }
 
       $scope.drop = (ev) => {
@@ -152,14 +204,22 @@ angular.module("app").controller("HomeController", [
          }
          ev.preventDefault();
          var data = ev.dataTransfer.getData("text");
-         const elementMoving = ships.find((item) => item.id === Number(data));
+         let elementMoving = ships.find((item) => item.id === Number(data));
+         if (!elementMoving) {
+            elementMoving = shipsPlaced.find(
+               (item) => item.id === Number(data)
+            );
+         }
 
          const blockAddShip = validateIfAddShip(elementMoving, index);
+         elementMoving.direction = $scope.direction;
 
          if (!blockAddShip) {
             addShip(elementMoving, index);
             ev.target.appendChild(document.getElementById(data));
-            const shipIndex = ships.findIndex((item) => item.id === Number(data));
+            const shipIndex = ships.findIndex(
+               (item) => item.id === Number(data)
+            );
             ships.splice(shipIndex, 1);
             shipsPlaced.push(elementMoving);
          }
@@ -172,9 +232,61 @@ angular.module("app").controller("HomeController", [
             alert("Posicione todos seus navios no campo de batalha");
             return;
          }
-         const response = await api.post('/battleship', { shipsPlaced });
-         $scope.startedGame = true;
-         console.log("valid");
+         const { data } = await api.post("/positions", { shipsPlaced });
+         if (data.message == "ok") {
+            $scope.startedGame = true;
+            localStorage.setItem("battleship@positions", true);
+         }
       };
+
+      function setAttack(index, hit, userId) {
+         let position = null;
+         if (userId == userLogged.id) {
+            position = document.querySelector(`[data-attack-index="${index}"]`);
+         } else {
+            position = document.querySelector(`[data-index="${index}"]`);
+         }
+         const className = hit ? "success-hit" : "lost-hit";
+         const div = `<div class="${className}"></div>`;
+         position.insertAdjacentHTML("afterbegin", div);
+      }
+
+      function checkIfShipwrecked() {
+         const ships = [
+            "destroyer",
+            "aircraft-carrier",
+            "battleship",
+            "submarine",
+            "patrol-boat",
+         ];
+
+         ships.forEach((ship) => {
+            const shipElements = document.querySelectorAll(
+               `.selected.position.${ship}`
+            );
+            const shipSank = Array.from(shipElements).every(
+               (item) => item.firstChild.nodeName === "DIV"
+            );
+            if (shipSank) {
+               socket.emit("shipSank", { ship, userLogged });
+            }
+         });
+      }
+
+      $scope.attack = async (index) => {
+         if (index == 0 || (index && (index < 11 || index % 11 == 0))) {
+            alert("Escolha uma opção válida");
+            return false;
+         }
+         const { data } = await api.post("/positions/attack", { index });
+         setAttack(index, data.hit, userLogged.id);
+         checkIfShipwrecked();
+      };
+
+      if (localStorage.getItem("battleship@positions")) {
+         checkExistingPositions();
+         startSocket();
+         // checkIfShipwrecked();
+      }
    },
 ]);

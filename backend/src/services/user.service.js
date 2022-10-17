@@ -1,46 +1,35 @@
-const jwt = require("jsonwebtoken");
-const { ObjectId } = require("mongodb");
-const { AppError } = require("../errors/AppError");
-const { userModel } = require("../models/user.model");
+import { ObjectId } from "mongodb";
+import { AppError } from "../errors/AppError";
+import userModelDB from "../models/user.model";
 
-const findById = async (id) => {
-   const user = userModel();
-   try {
-      const userExists = await user.find(ObjectId(id)).toArray();
+export class UserService {
+   async findById(id) {
+      const userModel = userModelDB();
+      try {
+         const userExists = await userModel.find(ObjectId(id)).toArray();
 
-      if (userExists && userExists.length) {
-         return userExists[0];
+         if (userExists && userExists.length) {
+            return userExists[0];
+         }
+      } catch (error) {
+         return null;
       }
-   } catch (error) {
-      return null;
-   }
-};
-
-const create = async (name) => {
-   if (!name) {
-      throw new AppError("Invalid entries. Try again.");
    }
 
-   const user = userModel();
-   const { ops: newUser } = await user.insertOne({
-      name,
-   });
+   async create(name) {
+      if (!name) {
+         throw new AppError("Invalid entries. Try again.");
+      }
 
-   return newUser[0];
-};
+      try {
+         const userModel = userModelDB();
+         const user = await userModel.insertOne({
+            name,
+         });
 
-const login = async (name) => {
-   const token = jwt.sign({}, "e815d71ce6e97fef83815bd851361823", {
-      subject: JSON.stringify({
-         name,
-      }),
-   });
-
-   return token;
-};
-
-module.exports = {
-   create,
-   findById,
-   login,
-};
+         return { name, id: user.insertedId };
+      } catch (error) {
+         console.log(error);
+      }
+   }
+}

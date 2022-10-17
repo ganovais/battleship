@@ -1,38 +1,34 @@
-const { resolve } = require('path');
-const express = require('express');
-const { AppError } = require('../errors/AppError');
-const router = require('../routes');
-const { makeConnection } = require('../database/conn');
+import express from 'express'
+import cors from 'cors'
+import { createServer } from "http";
 
-const tmpFolder = resolve(__dirname, '..', 'uploads');
+import { AppError } from '../errors/AppError';
+import router from '../routes';
+import { makeConnection } from '../database/conn';
+import { startInstanceSocket } from '../socket';
+
 const app = express();
 app.use(express.json());
-
-app.use('/src/uploads', express.static(`${tmpFolder}`));
+app.use(cors());
 
 makeConnection();
-
-// Não remover esse end-point, ele é necessário para o avaliador
-app.get('/', (request, response) => {
-  response.send();
-});
-// Não remover esse end-point, ele é necessário para o avaliador
 
 app.use(router);
 
 app.use((err, req, res, _) => {
-  if (err instanceof AppError) {
-    return res.status(err.statusCode).json({
-      message: err.message,
-    });
-  }
+   if (err instanceof AppError) {
+      return res.status(err.statusCode).json({
+         message: err.message,
+      });
+   }
 
-  return res.status(500).json({
-    status: 'error',
-    message: `Internal server error - ${err.message}`,
-  });
+   return res.status(500).json({
+      status: "error",
+      message: `Internal server error - ${err.message}`,
+   });
 });
 
-console.log(typeof app);
+const server = createServer(app);
+startInstanceSocket(server);
 
-module.exports = app;
+export default server;

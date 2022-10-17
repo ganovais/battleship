@@ -10,9 +10,11 @@ angular.module("app").controller("LoginController", [
       $scope.name = "";
       $scope.makeLogin = async () => {
          if ($scope.name) {
-            // const token = await api.post("/users", { name: $scope.name });
+            const { data } = await api.post("/users", { name: $scope.name });
+            localStorage.setItem("battleship@user", JSON.stringify(data.user));
+            api.defaults.headers.common['x-api-user'] = data.user.id;
             $location.path("/home");
-            // console.log(token);
+            $scope.$apply();
          }
       };
    },

@@ -2,17 +2,17 @@
    <div ng-if="startedGame" class="ships-placed">
       <p>Navios prontos para guerra!</p>
       <div>
-         <div ng-repeat="ship in getShips()" class="ship" ng-if="ship.indexStart != 0">
+         <div ng-repeat="ship in getShipsPlaced()" class="ship" ng-if="ship.indexStart != 0">
             <div ng-class="ship.class" class="legend"></div>
             <div>
                <p>{{ship.label}}</p>
-               <small>tamanho: {{ship.size}}</small>
+               <small ng-class="ship.class" class="ship-information">tamanho: {{ship.size}}</small>
             </div>
          </div>
       </div>
    </div>
    
-   <div class="ships">
+   <div class="ships" ng-show="!startedGame">
       <p>Arrume suas embarcações no campo de batalha</p>
       <div class="ships-choose">
          <div draggable="false" ng-repeat="ship in getShips()" ng-class="ship.class" class="ship">
@@ -56,17 +56,17 @@
          </div>
       </div>
 
-      <div ng-if="startedGame">
+      <div ng-show="startedGame">
          Posições que você já jogou no seu oponente
          <div class="combat-field">
-            <div ng-repeat="index in boardPositions" data-index="{{index}}" class="position" >
+            <div ng-repeat="index in boardPositions" ng-click="attack(index)" data-attack-index="{{index}}" class="position" >
                <p ng-if="index > 0 && index < 11">{{index}}</p>
                <p ng-if="index != 0 && index % 11 == 0">{{numberToLetter(index)}}</p>
             </div>
          </div>
       </div>
    </div>
-   <button type="submit"
+   <button ng-if="!startedGame" type="submit"
    class="mt-10 inline-flex items-center rounded-md border border-transparent bg-indigo-100 px-4 py-2 text-base font-medium text-indigo-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
    ng-click="startGame()">
    Iniciar jogo</button>

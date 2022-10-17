@@ -1,3 +1,4 @@
-const { getDb } = require('../database/conn');
+import { dbConnection } from "../database/conn";
 
-exports.userModel = () => getDb().collection('users');
+const userModelDB = () => dbConnection.collection("users");
+export default userModelDB;

@@ -1,31 +1,13 @@
-const { verify } = require('jsonwebtoken');
+import { AppError } from "../errors/AppError";
 
-const { AppError } = require('../errors/AppError');
-const { findById } = require('../services/user.service');
+export default async function ensureAuthenticated(request, response, next) {
+   const authHeader = request.headers["x-api-user"];
 
-exports.ensureAuthenticated = async (request, response, next) => {
-  const authHeader = request.headers.authorization;
+   if (!authHeader) {
+      throw new AppError("missing auth token", 401);
+   }
 
-  if (!authHeader) {
-    throw new AppError('missing auth token', 401);
-  }
+   request.userId = authHeader;
 
-  const [, token] = authHeader.split(' ');
-
-  try {
-    const { sub } = verify(token, 'e815d71ce6e97fef83815bd851361823');
-    const data = JSON.parse(sub);
-
-    const user = await findById(data.userId);
-
-    if (!user) {
-      throw new AppError('jwt malformed', 401);
-    }
-
-    request.userId = data.userId;
-
-    next();
-  } catch (error) {
-    throw new AppError('jwt malformed', 401);
-  }
-};
+   next();
+}

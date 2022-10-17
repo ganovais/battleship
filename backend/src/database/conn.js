@@ -1,28 +1,23 @@
-const { MongoClient } = require('mongodb');
+import { MongoClient } from "mongodb";
+import "dotenv/config";
 
-const connectionString = `mongodb://${process.env.HOST || 'mongodb'}:27017`;
-// const connectionString = process.env.DB_URL;
+const connectionString = `mongodb://${process.env.HOST || "mongodb"}:27017`;
 const client = new MongoClient(connectionString, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+   useNewUrlParser: true,
+   useUnifiedTopology: true,
 });
 
 let dbConnection = null;
 
-async function makeConnection() {
-  try {
-    await client.connect();
-    dbConnection = await client.db('battleship');
+const makeConnection = async () => {
+   try {
+      await client.connect();
+      dbConnection = client.db("battleship");
 
-    console.log('Connected successfully to server');
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-const getDb = () => dbConnection;
-
-module.exports = {
-  makeConnection,
-  getDb,
+      console.log("Connected successfully to server");
+   } catch (err) {
+      console.log(err);
+   }
 };
+
+export { dbConnection, makeConnection };

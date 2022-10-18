@@ -8,7 +8,7 @@ angular.module("app").controller("HomeController", [
    function ($scope) {
       const sizeBoard = 121; //11*11
       const marginRight = [11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121];
-      const socket = io("http://localhost:3000");
+      const socket = io("https://backend-battleship.herokuapp.com/");
       $scope.moveSVG = moveSVG;
       $scope.startedGame = false;
       $scope.direction = "horizontal";

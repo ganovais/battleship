@@ -299,10 +299,10 @@ angular.module("app").controller("HomeController", [
          checkIfShipwrecked();
       };
 
+      startSocket();
+      
       if (localStorage.getItem("battleship@positions")) {
          checkExistingPositions();
-         startSocket();
-         // checkIfShipwrecked();
       }
    },
 ]);

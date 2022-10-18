@@ -5,7 +5,8 @@ import api from "../../services/api";
 
 angular.module("app").controller("HomeController", [
    "$scope",
-   function ($scope) {
+   "$rootScope",
+   function ($scope, $rootScope) {
       const sizeBoard = 121; //11*11
       const marginRight = [11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121];
       const socket = io("https://backend-battleship.herokuapp.com/");
@@ -63,6 +64,11 @@ angular.module("app").controller("HomeController", [
       $scope.columnName = [{ index: 11, name: "a" }];
       $scope.boardPositions = [...Array(sizeBoard).keys()];
       const userLogged = JSON.parse(localStorage.getItem("battleship@user"));
+
+      function setUserHeader() {
+         $rootScope.$emit("checkUser", { teste: true });
+      }
+
       async function checkExistingPositions() {
          const { data } = await api.get("positions");
          const {
@@ -87,8 +93,10 @@ angular.module("app").controller("HomeController", [
          });
 
          socket.on("logout", (data) => {
-            if (data.userId != userLogged.id) {
+            const userLogged = JSON.parse(localStorage.getItem("battleship@user"));
+            if (userLogged && data.userId && data.userId != userLogged.id) {
                alert("Seu adversário abandonou a partida");
+               $rootScope.$emit("clearUserData", { owner: false });
             }
          });
 
@@ -300,7 +308,8 @@ angular.module("app").controller("HomeController", [
       };
 
       startSocket();
-      
+      setUserHeader();
+
       if (localStorage.getItem("battleship@positions")) {
          checkExistingPositions();
       }

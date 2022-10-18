@@ -9,11 +9,6 @@ angular.module("app").controller("LoginController", [
       $scope.playSVG = playSVG;
       $scope.name = "";
       
-      async function clearData() {
-         localStorage.removeItem("battleship@user");
-         localStorage.removeItem("battleship@positions");
-         await api.delete('/users/data');
-      }
       $scope.makeLogin = async () => {
          if ($scope.name) {
             const { data } = await api.post("/users", { name: $scope.name });
@@ -23,7 +18,5 @@ angular.module("app").controller("LoginController", [
             $scope.$apply();
          }
       };
-
-      clearData()
    },
 ]);

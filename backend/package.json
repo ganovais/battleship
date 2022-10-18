@@ -4,14 +4,17 @@
    "description": "",
    "main": "./src/api/server.js",
    "type": "module",
+   "engines": {
+      "node": "16.15.1"
+    },
    "scripts": {
-      "start": "node .",
+      "start": "NODE_OPTIONS='--experimental-specifier-resolution=node' node .",
       "dev": "NODE_OPTIONS='--experimental-specifier-resolution=node' nodemon .",
       "dev:test": "NODE_ENV=test NODE_OPTIONS='--experimental-specifier-resolution=node' mocha ./src/tests/**/*$NAME*.{test,spec}.js --exit",
       "test": "c8 -r text npm run dev:test"
    },
    "keywords": [],
-   "author": "",
+   "author": "Gabriel Novais",
    "license": "ISC",
    "dependencies": {
       "cors": "^2.8.5",

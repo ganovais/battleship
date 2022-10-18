@@ -86,6 +86,12 @@ angular.module("app").controller("HomeController", [
             console.log(`Socket ${socket.id}`);
          });
 
+         socket.on("logout", (data) => {
+            if (data.userId != userLogged.id) {
+               alert("Seu adversário abandonou a partida");
+            }
+         });
+
          socket.on("receiveAttack", (data) => {
             setAttack(data.index, data.successHit, data.userId);
          });
@@ -99,6 +105,9 @@ angular.module("app").controller("HomeController", [
                document.querySelector(
                   `.ship-information.${data.ship}`
                ).innerHTML = `Detonado tamanho: ${info[1]}`;
+               if (data.counter === 5) {
+                  alert("Você venceu!");
+               }
             }
          });
 
@@ -106,6 +115,7 @@ angular.module("app").controller("HomeController", [
             socket.off("connect");
             socket.off("receiveAttack");
             socket.off("shipSank");
+            socket.off("logout");
          };
       }
 
@@ -236,6 +246,10 @@ angular.module("app").controller("HomeController", [
          if (data.message == "ok") {
             $scope.startedGame = true;
             localStorage.setItem("battleship@positions", true);
+            Array.from(document.querySelectorAll(".draggable")).map((item) =>
+               item.remove()
+            );
+            $scope.$apply();
          }
       };
 
@@ -260,6 +274,7 @@ angular.module("app").controller("HomeController", [
             "patrol-boat",
          ];
 
+         let counter = 0;
          ships.forEach((ship) => {
             const shipElements = document.querySelectorAll(
                `.selected.position.${ship}`
@@ -268,7 +283,8 @@ angular.module("app").controller("HomeController", [
                (item) => item.firstChild.nodeName === "DIV"
             );
             if (shipSank) {
-               socket.emit("shipSank", { ship, userLogged });
+               counter++;
+               socket.emit("shipSank", { ship, userLogged, counter });
             }
          });
       }

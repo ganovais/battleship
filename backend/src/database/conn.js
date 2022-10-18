@@ -12,7 +12,7 @@ let dbConnection = null;
 const makeConnection = async () => {
    try {
       await client.connect();
-      dbConnection = client.db("battleship");
+      dbConnection = client.db(`battleship-${process.env.NODE_ENV}`);
 
       console.log("Connected successfully to server");
    } catch (err) {

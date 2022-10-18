@@ -7,7 +7,10 @@
          </a>
        </div>
        <div class="ml-10 space-x-4">
-         <a ng-if="user && user.name" href="#" class="inline-block rounded-md border border-transparent bg-[#457b9d] py-2 px-4 text-base font-medium text-white hover:bg-opacity-75">Sair</a>
+         <div class="flex items-center gap-2" ng-show="user && user.name">
+            <p class="text-white">Olá, {{user.name}}</p>
+            <button  ng-click="logout()" class="inline-block rounded-md border border-transparent bg-[#457b9d] py-2 px-4 text-base font-medium text-white hover:bg-opacity-75">Sair</button>
+         </div>
        </div>
      </div>
    </nav>

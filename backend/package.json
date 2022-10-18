@@ -6,13 +6,16 @@
    "type": "module",
    "scripts": {
       "start": "node .",
-      "dev": "NODE_OPTIONS='--experimental-specifier-resolution=node' nodemon ."
+      "dev": "NODE_OPTIONS='--experimental-specifier-resolution=node' nodemon .",
+      "dev:test": "NODE_ENV=test NODE_OPTIONS='--experimental-specifier-resolution=node' mocha ./src/tests/**/*$NAME*.{test,spec}.js --exit",
+      "test": "c8 -r text npm run dev:test"
    },
    "keywords": [],
    "author": "",
    "license": "ISC",
    "dependencies": {
       "cors": "^2.8.5",
+      "cross-env": "^7.0.3",
       "dotenv": "^16.0.3",
       "express": "^4.18.2",
       "express-async-errors": "^3.1.1",
@@ -20,6 +23,11 @@
       "socket.io": "^4.5.3"
    },
    "devDependencies": {
-      "nodemon": "^2.0.20"
+      "c8": "^7.12.0",
+      "chai": "^4.3.6",
+      "mocha": "^10.1.0",
+      "nodemon": "^2.0.20",
+      "sinon": "^14.0.1",
+      "sinon-chai": "^3.7.0"
    }
 }

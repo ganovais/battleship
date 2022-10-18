@@ -1,7 +1,8 @@
 import { MongoClient } from "mongodb";
 import "dotenv/config";
 
-const connectionString = `mongodb://${process.env.HOST || "mongodb"}:27017`;
+// const connectionString = `mongodb://${process.env.HOST || "mongodb"}:27017`;
+const connectionString = 'mongodb+srv://ganovais:ganovaismongodb@cluster0.ope2i1f.mongodb.net/?retryWrites=true&w=majority'
 const client = new MongoClient(connectionString, {
    useNewUrlParser: true,
    useUnifiedTopology: true,

@@ -46,7 +46,7 @@
 
    <div class="board">
       <div>
-         Campo de batalha
+         Seus navios
          <div class="combat-field">
             <div ng-repeat="index in boardPositions" data-index="{{index}}" class="position" ondrop="angular.element(this).scope().drop(event)"
                ondragover="angular.element(this).scope().allowDrop(event)">
@@ -57,7 +57,7 @@
       </div>
 
       <div ng-show="startedGame">
-         Posições que você já jogou no seu oponente
+         Ataque aqui seu oponente
          <div class="combat-field">
             <div ng-repeat="index in boardPositions" ng-click="attack(index)" data-attack-index="{{index}}" class="position" >
                <p ng-if="index > 0 && index < 11">{{index}}</p>
